@@ -11,6 +11,8 @@ int main(){
 	int nbre_clients=0, nbre_clients2=0;
 	int generation_id=1;
 	
+	message msg_recu, msg_envoi;
+	
 	char* liste_produit[]={"carotte","navet","potimarron"};
 	
 	key_t key = ftok("./a.txt", 0);
@@ -24,39 +26,40 @@ int main(){
 	else
 	{
 		while(nbre_clients < 4){
+			printf("0\n");
 			nbre_clients++;
-			message msg0;
-			msgrcv(id_msg, (void*)&msg0, long_msg, 1, 0);
+			printf("1\n");
+			msgrcv(id_msg, (void*)&msg_recu, long_msg, 1, 0);
 			printf("Message recu\n");
 			if(nbre_clients2 < 2){
 				nbre_clients2++;
-				switch(msg0.req_clt){
+				switch(msg_recu.req_clt){
 					case -1: // affectation num client
 						printf("Affectation num client\n");
-						message msg;
-						msg.type=14;
-						msg.id_clt=generation_id; // num
-						msg.req_clt=0;
-						msg.text='a';
+						msg_envoi.type=14;
+						msg_envoi.id_clt=generation_id; // num
+						msg_envoi.req_clt=0;
+						msg_envoi.text='a';
 						
 						generation_id++;
-						msgsnd(id_msg, (void*)&msg, long_msg, 0);
+						msgsnd(id_msg, (void*)&msg_envoi, long_msg, 0);
 						nbre_clients++;
+						printf("Envoyé\n");
 						break;
 						
 					case 3: // liste produit
 						printf("Liste produit\n");
-						message msg2;
-						msg2.type=msg0.id_clt;
-						msg2.id_clt=1; // num	
-						msg2.req_clt=0;
-						msg2.text='4';
-						printf("msg.text=%c\n",msg2.text);
-						msgsnd(id_msg, (void*)&msg2, long_msg, 0);
+						
+						msg_envoi.type=msg_recu.id_clt;
+						msg_envoi.id_clt=1; // num	
+						msg_envoi.req_clt=0;
+						msg_envoi.text='c';
+						printf("msg.text=%c\n", msg_envoi.text);
+						msgsnd(id_msg, (void*)&msg_envoi, long_msg, 0);
 						
 				}
 				nbre_clients2--;
-			}
+			} else printf("Sortie else\n");
 		}
 		
 		

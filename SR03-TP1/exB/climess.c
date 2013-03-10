@@ -1,11 +1,12 @@
 #include "header.h"
 
+
 int main(){
 	int id_msg;
 	int i;
 	int long_msg=sizeof(message)-sizeof(long);
 	int id_clt;
-	message msg;
+	message msg_recu, msg_envoi;
 	
 	key_t key = ftok("./a.txt", 0);
 	
@@ -22,11 +23,14 @@ int main(){
 		
 		// Demande numero client
 		printf("Demande numero client\n");
-		msg.type=1; // le serveur ne récupère que les msg de type 1
-		msg.req_clt=-1;
-		msgsnd(id_msg, (void*)&msg, long_msg, 0);
-		msgrcv(id_msg, (void*)&msg, long_msg, 14, 0);
-		id_clt=msg.id_clt;
+		msg_envoi.type=1; // le serveur ne récupère que les msg de type 1
+		msg_envoi.req_clt=-1;
+		msg_envoi.id_clt=-1;
+		msg_envoi.text='\0';
+		
+		msgsnd(id_msg, (void*)&msg_envoi, long_msg, 0);
+		msgrcv(id_msg, (void*)&msg_recu, long_msg, 14, 0);
+		id_clt=msg_recu.id_clt;
 		printf("Recu : %d \n",id_clt);
 
 		int choix;
@@ -42,14 +46,14 @@ int main(){
 				case 1:
 					// Demande liste produit
 					printf("Demande liste produit\n");
-					msg.type=1;
-					msg.req_clt=3;
-					msg.id_clt=id_clt;
+					msg_envoi.type=1;
+					msg_envoi.req_clt=3;
+					msg_envoi.id_clt=id_clt;
+					msg_envoi.text='b';
+					msgsnd(id_msg, (void*)&msg_envoi, long_msg, 0);
+					msgrcv(id_msg, (void*)&msg_recu, long_msg, id_clt, 0);
 
-					msgsnd(id_msg, (void*)&msg, long_msg, 0);
-					msgrcv(id_msg, (void*)&msg, long_msg, id_clt, 0);
-
-					printf("- %c\n",msg.text);
+					printf("- %c\n",msg_recu.text);
 					break;
 				default:
 					break;
@@ -57,3 +61,7 @@ int main(){
 		}
 			}
 }
+
+
+
+
