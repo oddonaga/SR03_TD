@@ -1,4 +1,4 @@
-/*#include "header.h"
+#include "header.h"
 
 
 int main(){
@@ -26,7 +26,7 @@ int main(){
 		msg_envoi.type=1; // le serveur ne récupère que les msg de type 1
 		msg_envoi.req_clt=-1;
 		msg_envoi.id_clt=-1;
-		msg_envoi.text[0]='\0';
+		//msg_envoi.text[0]='\0';
 		
 		msgsnd(id_msg, (void*)&msg_envoi, long_msg, 0);
 		msgrcv(id_msg, (void*)&msg_recu, long_msg, 14, 0);
@@ -47,32 +47,32 @@ int main(){
 				case 1:
 					// Demande liste produit
 					printf("Demande liste produit\n");
-					msg_envoi.type=2;
+					msg_envoi.type=1;
 					msg_envoi.req_clt=3;
 					msg_envoi.id_clt=id_clt;
-					msg_envoi.text[0]='b';
 					
-					int x = msgsnd(id_msg, (void*)&msg_envoi, long_msg, 0);
-					printf("x = %d", x);
+					if(msgsnd(id_msg, (void*)&msg_envoi, long_msg, 0))
+						printf("erreur msgrcv\n");
 					msgrcv(id_msg, (void*)&msg_recu, long_msg, id_clt, 0);
 
-					printf("- %s\n",msg_recu.text);
+					for(i=0;i<MAX_ELT;i++)
+						printf("- %s\n",msg_recu.text[i]);
 					break;
 				case 2:
 					// Demande Ajout n produits
-					printf("Demande Ajout n produits\n");
-					printf("Combien de produits voulez-vous ajouter ?\n");
-					scanf("%d",&n);
-					
-					msg_envoi.type=2;
-					msg_envoi.req_clt=4;
-					msg_envoi.id_clt=id_clt;
-					msg_envoi.text[0] = (char)n;
-					printf("text : %s", msg_envoi.text);
-					msgsnd(id_msg, (void*)&msg_envoi, long_msg, 0);
-					msgrcv(id_msg, (void*)&msg_recu, long_msg, id_clt, 0);
-
-					printf("- %s\n",msg_recu.text);
+					//printf("Demande Ajout n produits\n");
+//					printf("Combien de produits voulez-vous ajouter ?\n");
+//					scanf("%d",&n);
+//					
+//					msg_envoi.type=1;
+//					msg_envoi.req_clt=4;
+//					msg_envoi.id_clt=id_clt;
+//					//msg_envoi.text[0] = (char)n;
+//					//printf("text : %s", msg_envoi.text);
+//					msgsnd(id_msg, (void*)&msg_envoi, long_msg, 0);
+//					msgrcv(id_msg, (void*)&msg_recu, long_msg, id_clt, 0);
+//
+//					printf("- %s\n",msg_recu.text);
 					break;
 				default:
 					break;

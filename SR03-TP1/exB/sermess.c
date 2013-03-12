@@ -1,5 +1,5 @@
 #include "header.h"
-#include <errno.h>
+
 
 
 
@@ -9,7 +9,7 @@ int main(){
 	int i,j;
 	
 	int nbre_clients=0, nbre_clients2=0;
-	int generation_id=1;
+	int generation_id=2;
 	
 	message msg_recu, msg_envoi;
 	
@@ -41,11 +41,9 @@ int main(){
 	}
 	
 		while(nbre_clients < 4){
-			printf("0\n");
 			nbre_clients++;
-			printf("1\n");
-			if(msgrcv(id_msg, (void*)&msg_recu, long_msg, 1, 0)==-1);
-				printf("erreur msgrcv");
+			if(msgrcv(id_msg, (void*)&msg_recu, long_msg, 1, 0)==-1)
+				printf("erreur msgrcv\n");
 			else
 				printf("Message recu\n");
 			if(nbre_clients2 < 3){
@@ -56,47 +54,44 @@ int main(){
 						msg_envoi.type=14;
 						msg_envoi.id_clt=generation_id; // num
 						msg_envoi.req_clt=0;
-						//msg_envoi.text='a';
 						
-						generation_id++;
+						
 						msgsnd(id_msg, (void*)&msg_envoi, long_msg, 0);
 						nbre_clients++;
-						printf("Envoyé\n");
+						printf("Envoyé : %d\n",generation_id);
+						generation_id++;
 						break;
 						
 					case 3: // liste produit
 						printf("Liste produit\n");
 						
-						msg_envoi.type=1;
+						msg_envoi.type=msg_recu.id_clt;
 						msg_envoi.id_clt=msg_recu.id_clt; // num	
 						msg_envoi.req_clt=0;
 						
-						msg_envoi.text[0]=' ';
 						for(j=0;j<3;j++)
-						{
-							strcat(msg_envoi.text, liste_produit[j]);
-							strcat(msg_envoi.text, " ");
-						}
-						printf("msg.text=%s\n", msg_envoi.text);
+							strcpy(msg_envoi.text[j], liste_produit[j]);
+						
+						printf("Envoi de la liste\n", msg_envoi.text);
 						msgsnd(id_msg, (void*)&msg_envoi, long_msg, 0);
 						break;
 						
 					case 4: // ajouter n objets
 						printf("Ajouter n objets\n");
 						
-						int n = (int)msg_recu.text[0];
-						msg_envoi.type=1;
-						msg_envoi.id_clt=msg_recu.id_clt; // num	
-						msg_envoi.req_clt=0;
-						
-						msg_envoi.text[0]=' ';
-						for(j=0;j<n;j++)
-						{
-							strcat(msg_envoi.text, liste_produit[j]);
-						}
-						printf("msg.text=%s\n", msg_envoi.text);
-						msgsnd(id_msg, (void*)&msg_envoi, long_msg, 0);
-						break;
+						//int n = (int)msg_recu.text[0];
+//						msg_envoi.type=1;
+//						msg_envoi.id_clt=msg_recu.id_clt; // num	
+//						msg_envoi.req_clt=0;
+//						
+//						msg_envoi.text[0]=' ';
+//						for(j=0;j<n;j++)
+//						{
+//							strcat(msg_envoi.text, liste_produit[j]);
+//						}
+//						printf("msg.text=%s\n", msg_envoi.text);
+//						msgsnd(id_msg, (void*)&msg_envoi, long_msg, 0);
+//						break;
 						
 				}
 				nbre_clients2--;

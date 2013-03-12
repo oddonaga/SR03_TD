@@ -12,13 +12,15 @@
 # include <sys/types.h>
 # include <sys/ipc.h>
 # include <sys/msg.h>
+#include <errno.h>
 
-const MAX_ELT=10;
+const MAX_ELT=3;
+const MAX_TAILLE_STRING=20;
 
 typedef struct{
 	long type;
 	int req_clt;
 	int id_clt;
-	char text;
+	char text[10][10];
 }message;
 
