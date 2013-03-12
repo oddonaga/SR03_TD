@@ -1,14 +1,14 @@
-#include "header.h"
+/*#include "header.h"
 
 
 int main(){
 	int id_msg;
-	int i;
+	int i,n;
 	int long_msg=sizeof(message)-sizeof(long);
 	int id_clt;
 	message msg_recu, msg_envoi;
 	
-	key_t key = ftok("./a.txt", 0);
+	key_t key = ftok("./sr03p055.txt", 0);
 	
 	if(key==-1)
 		perror("error ftok");
@@ -26,7 +26,7 @@ int main(){
 		msg_envoi.type=1; // le serveur ne récupère que les msg de type 1
 		msg_envoi.req_clt=-1;
 		msg_envoi.id_clt=-1;
-		msg_envoi.text='\0';
+		msg_envoi.text[0]='\0';
 		
 		msgsnd(id_msg, (void*)&msg_envoi, long_msg, 0);
 		msgrcv(id_msg, (void*)&msg_recu, long_msg, 14, 0);
@@ -38,6 +38,7 @@ int main(){
 			printf("\nClient n°%d\n", id_clt);
 			printf("-----------------\n");
 			printf("1 : Demander la liste des produits\n");
+			printf("2 : Ajouter n produits au panier\n");
 			printf("-----------------\n");
 			printf("Choix : ");
 			scanf("%d",&choix);
@@ -46,14 +47,32 @@ int main(){
 				case 1:
 					// Demande liste produit
 					printf("Demande liste produit\n");
-					msg_envoi.type=1;
+					msg_envoi.type=2;
 					msg_envoi.req_clt=3;
 					msg_envoi.id_clt=id_clt;
-					msg_envoi.text='b';
+					msg_envoi.text[0]='b';
+					
+					int x = msgsnd(id_msg, (void*)&msg_envoi, long_msg, 0);
+					printf("x = %d", x);
+					msgrcv(id_msg, (void*)&msg_recu, long_msg, id_clt, 0);
+
+					printf("- %s\n",msg_recu.text);
+					break;
+				case 2:
+					// Demande Ajout n produits
+					printf("Demande Ajout n produits\n");
+					printf("Combien de produits voulez-vous ajouter ?\n");
+					scanf("%d",&n);
+					
+					msg_envoi.type=2;
+					msg_envoi.req_clt=4;
+					msg_envoi.id_clt=id_clt;
+					msg_envoi.text[0] = (char)n;
+					printf("text : %s", msg_envoi.text);
 					msgsnd(id_msg, (void*)&msg_envoi, long_msg, 0);
 					msgrcv(id_msg, (void*)&msg_recu, long_msg, id_clt, 0);
 
-					printf("- %c\n",msg_recu.text);
+					printf("- %s\n",msg_recu.text);
 					break;
 				default:
 					break;
