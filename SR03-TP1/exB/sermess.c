@@ -13,7 +13,13 @@ int main(){
 	
 	message msg_recu, msg_envoi;
 	
-	char* liste_produit[]={"carotte","navet","potimarron"};
+	//produit liste_produit[]={
+//		"carotte","pizza","navet","potimarron","raviolis","patate",".",".",".","."};
+
+	produit p1={0, "carotte", 5, 1.2}, p2={1, "pizza", 10, 3.5}, p3={2, "raviolis", 6, 2.5},
+	p4={3, "navet", 1, 1.7}, p5={4, "patate", 20, 0.2};
+	produit liste_produit[]={p1,p2,p3,p4,p5};
+	
 	
 	key_t key = ftok("./sr03p055.txt", 0);
 	
@@ -69,10 +75,24 @@ int main(){
 						msg_envoi.id_clt=msg_recu.id_clt; // num	
 						msg_envoi.req_clt=0;
 						
-						for(j=0;j<3;j++)
-							strcpy(msg_envoi.text[j], liste_produit[j]);
+						for(j=0;j<MAX_ELT;j++)
+							strcpy(msg_envoi.text[j], liste_produit[j].description);
 						
-						printf("Envoi de la liste\n", msg_envoi.text);
+						printf("Envoi de la liste %s\n", msg_envoi.text[2]);
+						msgsnd(id_msg, (void*)&msg_envoi, long_msg, 0);
+						break;
+						
+					case 5: // détails pour un produit
+						printf("Détail produit\n");
+						msg_envoi.type=msg_recu.id_clt;
+						msg_envoi.id_clt=msg_recu.id_clt; // num	
+						msg_envoi.req_clt=0;
+						
+						
+						produit p=liste_produit[msg_recu.id_produit];
+						char tmp[50];
+						sprintf(msg_envoi.text2,"Produit %s -> prix : %.1f€, %d en stock\n",p.description, p.prix, p.en_stock); 
+								
 						msgsnd(id_msg, (void*)&msg_envoi, long_msg, 0);
 						break;
 						

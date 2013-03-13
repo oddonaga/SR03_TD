@@ -33,7 +33,7 @@ int main(){
 		id_clt=msg_recu.id_clt;
 		printf("Recu : %d \n",id_clt);
 
-		int choix;
+		int choix, choix2;
 		while(1){
 			printf("\nClient n°%d\n", id_clt);
 			printf("-----------------\n");
@@ -54,9 +54,33 @@ int main(){
 					if(msgsnd(id_msg, (void*)&msg_envoi, long_msg, 0))
 						printf("erreur msgrcv\n");
 					msgrcv(id_msg, (void*)&msg_recu, long_msg, id_clt, 0);
-
+					
+					int nbre_elts=0;
 					for(i=0;i<MAX_ELT;i++)
-						printf("- %s\n",msg_recu.text[i]);
+						if(strcmp(msg_recu.text[i],".")>0){
+							printf("- %d",i+1);
+							printf(" : %s\n",msg_recu.text[i]);
+							nbre_elts++;
+						}
+					
+					printf("\nTapez le numéro du produit pour obtenir des informations, 0 pour revenir au menu : ");
+					scanf("%d",&choix2);
+					
+					if(choix2<1 || choix2>nbre_elts)
+						break;
+					
+					// Détail produit
+					msg_envoi.type=1;
+					msg_envoi.req_clt=5;
+					msg_envoi.id_clt=id_clt;
+					msg_envoi.id_produit=choix2;
+					
+					if(msgsnd(id_msg, (void*)&msg_envoi, long_msg, 0))
+						printf("erreur msgrcv\n");
+					msgrcv(id_msg, (void*)&msg_recu, long_msg, id_clt, 0);
+
+					printf("%s\n",msg_recu.text2);
+					
 					break;
 				case 2:
 					// Demande Ajout n produits
