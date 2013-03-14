@@ -12,7 +12,7 @@ int main(){
 	
 	if(key==-1)
 		perror("error ftok");
-
+	
 	id_msg = msgget(key, 0);
 	if(id_msg==-1)
 		perror("msgget() - pas de file !");	
@@ -32,7 +32,7 @@ int main(){
 		msgrcv(id_msg, (void*)&msg_recu, long_msg, 14, 0);
 		id_clt=msg_recu.id_clt;
 		printf("Recu : %d \n",id_clt);
-
+		
 		int choix, choix2;
 		while(1){
 			printf("\nClient n°%d\n", id_clt);
@@ -78,33 +78,33 @@ int main(){
 					if(msgsnd(id_msg, (void*)&msg_envoi, long_msg, 0))
 						printf("erreur msgrcv\n");
 					msgrcv(id_msg, (void*)&msg_recu, long_msg, id_clt, 0);
-
+					
 					printf("%s\n",msg_recu.text2);
 					
 					break;
 				case 2:
 					// Demande Ajout n produits
-					//printf("Demande Ajout n produits\n");
-//					printf("Combien de produits voulez-vous ajouter ?\n");
-//					scanf("%d",&n);
-//					
-//					msg_envoi.type=1;
-//					msg_envoi.req_clt=4;
-//					msg_envoi.id_clt=id_clt;
-//					//msg_envoi.text[0] = (char)n;
-//					//printf("text : %s", msg_envoi.text);
-//					msgsnd(id_msg, (void*)&msg_envoi, long_msg, 0);
-//					msgrcv(id_msg, (void*)&msg_recu, long_msg, id_clt, 0);
-//
-//					printf("- %s\n",msg_recu.text);
+					printf("Demande Ajout n produits\n");
+					printf("Combien de produits voulez-vous ajouter ?\n");
+					scanf("%d",&n);
+					
+					msg_envoi.type=1;
+					msg_envoi.req_clt=4;
+					msg_envoi.id_clt=id_clt;
+					msg_envoi.id_produit = n;
+					
+					if(msgsnd(id_msg, (void*)&msg_envoi, long_msg, 0))
+						printf("\n");
+					
+					msgrcv(id_msg, (void*)&msg_recu, long_msg, id_clt, 0);
+					for(i=0;i<n;i++)
+					{
+						printf("produit ajouté : %s\n",msg_recu.text[i]);
+					}
 					break;
 				default:
 					break;
 			}
 		}
-			}
+	}
 }
-
-
-
-
