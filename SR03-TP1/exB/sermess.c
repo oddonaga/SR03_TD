@@ -11,6 +11,8 @@ int main(){
 	int nbre_clients=0, nbre_clients2=0;
 	int generation_id=2;
 	
+	produit p;
+	
 	message msg_recu, msg_envoi;
 	
 	//produit liste_produit[]={
@@ -21,7 +23,7 @@ int main(){
 	produit liste_produit[]={p1,p2,p3,p4,p5};
 	
 	
-	key_t key = ftok("./sr03p055.txt", 0);
+	key_t key = ftok("./a.txt", 0);
 	
 	if(key==-1)
 		perror("error ftok");
@@ -37,7 +39,7 @@ int main(){
 			char system_call[150];
 			strcpy(system_call, "ipcrm -Q ");
 			strcat(system_call, buffer_key);
-			printf(system_call);
+			//printf(system_call);
 			printf("\n");
 			// Suppression
 			system(system_call);
@@ -47,24 +49,26 @@ int main(){
 	}
 	
 	while(nbre_clients < 4){
-		nbre_clients++;
 		if(msgrcv(id_msg, (void*)&msg_recu, long_msg, 1, 0)==-1)
 			printf("erreur msgrcv\n");
 		else
 			printf("Message recu\n");
+		
 		if(nbre_clients2 < 3){
 			nbre_clients2++;
+			
 			switch(msg_recu.req_clt){
 				case -1: // affectation num client
 					printf("Affectation num client\n");
+					nbre_clients++;
 					msg_envoi.type=14;
 					msg_envoi.id_clt=generation_id; // num
 					msg_envoi.req_clt=0;
 					
 					
 					msgsnd(id_msg, (void*)&msg_envoi, long_msg, 0);
-					nbre_clients++;
-					printf("Envoyé : %d\n",generation_id);
+					
+					printf("Envoyé : %d\n\n",generation_id);
 					generation_id++;
 					break;
 					
@@ -78,7 +82,7 @@ int main(){
 					for(j=0;j<MAX_ELT;j++)
 						strcpy(msg_envoi.text[j], liste_produit[j].description);
 					
-					printf("Envoi de la liste %s\n", msg_envoi.text[2]);
+					printf("Envoi de la liste\n\n");
 					msgsnd(id_msg, (void*)&msg_envoi, long_msg, 0);
 					break;
 					
@@ -88,11 +92,11 @@ int main(){
 					msg_envoi.id_clt=msg_recu.id_clt; // num
 					msg_envoi.req_clt=0;
 					
-					
-					produit p=liste_produit[msg_recu.id_produit];
+					p=liste_produit[msg_recu.id_produit-1];
 					char tmp[50];
 					sprintf(msg_envoi.text2,"Produit %s -> prix : %.1f€, %d en stock\n",p.description, p.prix, p.en_stock);
 					
+					printf("Envoi description du produit %s\n\n", p.description);
 					msgsnd(id_msg, (void*)&msg_envoi, long_msg, 0);
 					break;
 					
@@ -102,17 +106,33 @@ int main(){
 					msg_envoi.type=msg_recu.id_clt;
 					msg_envoi.id_clt=msg_recu.id_clt; // num
 					msg_envoi.req_clt=0;
-					int n = msg_recu.id_produit;
 					
-					for(j=0;j<n;j++)
+					if(msg_recu.quantite>liste_produit[msg_recu.id_produit-1].en_stock)
 					{
-						strcpy(msg_envoi.text[j], liste_produit[j].description);
+						msg_envoi.insuffisant = 1;
+						printf("stock insuffisant pour le produit %s\n", liste_produit[msg_recu.id_produit-1].description);
 					}
+					else
+					{
+						msg_envoi.insuffisant = 0;
+						liste_produit[msg_recu.id_produit-1].en_stock = liste_produit[msg_recu.id_produit-1].en_stock - msg_recu.quantite;
+					}
+					
+					sprintf(msg_envoi.text2, "%s", liste_produit[msg_recu.id_produit-1].description);
+					printf("%s, quantite restante : %d\n\n", liste_produit[msg_recu.id_produit-1].description, liste_produit[msg_recu.id_produit-1].en_stock);
 					
 					msgsnd(id_msg, (void*)&msg_envoi, long_msg, 0);
 					break;
 					
+				case 6: //vider panier
+					printf("Retour des objets du panier en stock\n");
+					for(j=0;j<5;j++)
+					{
+						liste_produit[j].en_stock = liste_produit[j].en_stock + msg_recu.retour_produit_quantite[j];
+					}	
+					
 			}
+			
 			nbre_clients2--;
 		} else printf("Sortie else\n");
 	}
